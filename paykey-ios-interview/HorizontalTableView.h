@@ -17,10 +17,11 @@
 
 @end
 
-@interface HorizontalTableView : UIView
+@interface HorizontalTableView : UIView <UITableViewDelegate, UITableViewDataSource>
 
 @property (weak)   id<HorizontalTableViewDataSource>    dataSource;
 @property (assign) CGFloat                              cellWidth;
+@property (nonatomic, strong) UITableView*              tableView;
 
 - (UIView*)dequeueCell;
 

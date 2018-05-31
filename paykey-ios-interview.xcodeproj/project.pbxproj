@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3B5C777D20BF5E02005C5400 /* ViewController+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ViewController+Private.h"; sourceTree = "<group>"; };
 		BADDC5181FCE925E00B60AD9 /* paykey-ios-interview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "paykey-ios-interview.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BADDC51B1FCE925E00B60AD9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BADDC51C1FCE925E00B60AD9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -115,6 +116,7 @@
 				BADDC5261FCE925E00B60AD9 /* LaunchScreen.storyboard */,
 				BADDC5291FCE925E00B60AD9 /* Info.plist */,
 				BADDC52A1FCE925E00B60AD9 /* main.m */,
+				3B5C777D20BF5E02005C5400 /* ViewController+Private.h */,
 			);
 			path = "paykey-ios-interview";
 			sourceTree = "<group>";
