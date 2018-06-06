@@ -49,7 +49,8 @@ static NSString *cellIdentifier = @"cell";
     [self initData];
     
     [self createPage:0];
-    
+    [self createPage:1];
+
 }
 
 -(void)initData
