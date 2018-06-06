@@ -17,11 +17,13 @@
 
 @end
 
-@interface HorizontalTableView : UIView <UITableViewDelegate, UITableViewDataSource>
+@interface HorizontalTableView : UIView <UIScrollViewDelegate>
 
 @property (weak)   id<HorizontalTableViewDataSource>    dataSource;
 @property (assign) CGFloat                              cellWidth;
-@property (nonatomic, strong) UITableView*              tableView;
+@property (strong, nonatomic) UIScrollView*             scrollView;
+@property (nonatomic,assign) int currentPage;
+@property (strong, nonatomic) NSMutableArray*             labelViews;
 
 - (UIView*)dequeueCell;
 

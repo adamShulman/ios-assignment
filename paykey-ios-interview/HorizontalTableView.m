@@ -17,81 +17,122 @@ static NSString *cellIdentifier = @"cell";
 
 
 - (UIView*)dequeueCell{
+    
     return nil;
-}
-
-- (void)setTableView:(UITableView *)tableView
-{
-    _tableView = tableView;
-    
-    self.tableView.delegate = self;
-    self.tableView.dataSource = self;
-    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
-    [self.tableView registerClass:[UITableViewCell self] forCellReuseIdentifier:@"cell"];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [self addSubview:self.tableView];
 }
 
 - (void)setFrame:(CGRect)frame
 {
     super.frame = frame;
     
-    self.tableView = [[UITableView alloc] initWithFrame:self.frame style:UITableViewStylePlain];
-    
-    [self changeTableViewOrientation];
+    if(!self.scrollView){
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:frame];
+        _scrollView = scrollView;
+    }
+    [self setScrollView:self.scrollView];
 }
 
-- (void)changeTableViewOrientation
+-(void)setScrollView:(UIScrollView *)scrollView{
+    
+    _scrollView = scrollView;
+    
+    self.scrollView.delegate = self;
+    self.scrollView.pagingEnabled = NO;
+    self.scrollView.clipsToBounds = YES;
+    self.scrollView.contentSize = CGSizeMake(self.frame.size.width * [self.dataSource horizontalTableViewNumberOfCells:self] / 3, 100);
+    self.scrollView.showsHorizontalScrollIndicator = YES;
+    [self.scrollView setUserInteractionEnabled:YES];
+    self.scrollView.frame = CGRectMake(self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height);
+    
+    [self addSubview:_scrollView];
+    
+    [self initData];
+    
+    [self createPage:0];
+    
+}
+
+-(void)initData
 {
-    if (!self.tableView)
-        return;
-    
-    // Adjust tableView frame
-    int xOrigin = (self.bounds.size.width - self.bounds.size.height) / 2.0;
-    int yOrigin = (self.bounds.size.height - self.bounds.size.width) / 2.0;
-    self.tableView.frame = CGRectMake(xOrigin, yOrigin, self.bounds.size.height, self.bounds.size.width);
-    
-    // Apply rotation to tableView
-    self.tableView.transform = CGAffineTransformMakeRotation(-M_PI/2);
-    
-    self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(0.0, 0.0, 0.0, self.bounds.size.height - 5.0);
-    
-    
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return DEFAULT_CELL_WIDTH;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.dataSource horizontalTableViewNumberOfCells:self];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
-    
-    if (cell == nil)
-    {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+    self.labelViews  = [[NSMutableArray alloc] init];
+    for (int i = 0; i < [self.dataSource horizontalTableViewNumberOfCells:self]; i++) {
+        [self.labelViews addObject:[NSNull null]];
     }
     
-    cell.textLabel.text = [@(indexPath.row) description];
-    cell.textLabel.textAlignment = NSTextAlignmentCenter;
-    cell.contentView.backgroundColor = [UIColor grayColor];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //Match UILabel frame to cell frame
-        int xOrigin = (cell.bounds.size.width - cell.bounds.size.height) / 2.0;
-        int yOrigin = (cell.bounds.size.height - cell.bounds.size.width) / 2.0;
-        cell.textLabel.frame = CGRectMake(xOrigin, yOrigin, cell.bounds.size.height, cell.bounds.size.width);
-        // Rotate UILabel and add it to the rotated cell
-        cell.textLabel.transform = CGAffineTransformMakeRotation(M_PI/2.0);
-        
-    });
-    
-    return cell;
 }
 
+-(void)createPage:(int)page
+{
+    
+    if (page < 0) return;
+    if (page >= [self.dataSource horizontalTableViewNumberOfCells:self] / 3) return;
+    
+    for (int i=page * 3; i <= page * 3 + 3; i++) {
+        
+        
+        UILabel *label = [self.labelViews objectAtIndex:i];
+        
+        if ((NSNull *)label == [NSNull null]) {
+            
+            label = (UILabel*)[self.dataSource horizontalTableView:self cellForIndex:i];
+            [self.labelViews replaceObjectAtIndex:i withObject:label];
+            
+        }
+        
+        if (label != nil && label.superview == nil) {
+            CGRect frame = self.scrollView.frame;
+            frame.origin.x = frame.size.width * i / 3;
+            frame.origin.y = 0;
+            frame.size.width = self.frame.size.width / 3;
+            label.frame = frame;
+            [self.scrollView addSubview:label];
+            
+        }
+        
+    }
+    
+}
+
+-(void) resetNotVisibleLabels {
+    
+    int previousPage = self.currentPage - 2;
+    int nextPage = self.currentPage + 2;
+    
+    if(previousPage < 0 || nextPage * 3 + 3 >= [self.dataSource horizontalTableViewNumberOfCells:self]){return;}
+    
+    for (int i=previousPage * 3; i <= previousPage * 3 + 2; i++) {
+        
+        UILabel *label = [self.labelViews objectAtIndex:i];
+        if ((NSNull *)label != [NSNull null]) {
+            [label removeFromSuperview];
+            [self.labelViews replaceObjectAtIndex:i withObject:[NSNull null]];
+        }
+        
+    }
+    
+    for (int i=nextPage * 3; i <= nextPage * 3 + 2; i++) {
+        
+        UILabel *label = [self.labelViews objectAtIndex:i];
+        if ((NSNull *)label != [NSNull null]) {
+            [label removeFromSuperview];
+            [self.labelViews replaceObjectAtIndex:i withObject:[NSNull null]];
+        }
+        
+    }
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    CGFloat pageWidth = scrollView.frame.size.width;
+    int page = floor((scrollView.contentOffset.x - pageWidth) / pageWidth) + 1;
+    
+    if(self.currentPage != page) {
+        self.currentPage = page;
+        [self createPage:page - 1];
+        [self createPage:page];
+        [self createPage:page + 1];
+        [self resetNotVisibleLabels];
+    }
+    
+}
 @end
